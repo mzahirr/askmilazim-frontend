@@ -1,4 +1,6 @@
 const store = require('../store')
+const datetimepicker = require('eonasdan-bootstrap-datetimepicker')
+const jquery = require('jquery')
 
 module.exports = (state, emitter) => {
 
@@ -15,6 +17,13 @@ module.exports = (state, emitter) => {
             maritalStatus: ''
         }
     }
+
+    emitter.on(state.events.DOMCONTENTLOADED, () => {
+        jquery('#datetimepicker1').datetimepicker({
+            viewMode: 'years',
+            format: 'YYYY-MM-DD'
+        });
+    })
 
     emitter.on('index:register:attempt', () => {
         console.log(state.index.register)

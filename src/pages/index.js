@@ -1,6 +1,4 @@
 const html = require('choo/html')
-const datetime = require('eonasdan-bootstrap-datetimepicker')
-const jq = require('jquery')
 
 module.exports = (state, emit) => {
 
@@ -75,7 +73,7 @@ module.exports = (state, emit) => {
                             Facebook ile Kayıt Ol
                         </a>
                         <span class="middle-desc">veya e-posta ile kayıt ol</span>
-                        <form action="" id="register-form">
+                        <form id="register-form">
                             <div class="form-group">
                                 <input type="email" id="email" name="email" value="${state.index.register.email}" oninput=${onInput} class="form-control" placeholder="E-Posta Adresiniz">
                             </div><!-- end form-group -->
@@ -91,8 +89,14 @@ module.exports = (state, emit) => {
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
-                            <Datetime dateFormat="YYYY-MM" timeFormat=${false} />
-                            
+                            <div class="form-group">
+                                <div class="input-group date" id="datetimepicker1">
+                                    <input type="text" class="form-control" />
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>      
                             <div class="form-group divide">
                                 <div class="select-wrapper">
                                     <select class="form-control" name="city" id="city" onchange=${onInput}>
