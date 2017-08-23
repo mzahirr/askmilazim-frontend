@@ -1,6 +1,8 @@
 const store = require('../store')
 const datetimepicker = require('eonasdan-bootstrap-datetimepicker')
 const jquery = require('jquery')
+const html = require('choo/html')
+const select2 = require('select2')
 
 module.exports = (state, emitter) => {
 
@@ -15,15 +17,104 @@ module.exports = (state, emitter) => {
             state: '',
             profession: '',
             maritalStatus: ''
+        },
+
+        login: {
+            email : '',
+            password: ''
         }
     }
 
     emitter.on(state.events.DOMCONTENTLOADED, () => {
         jquery('#datetimepicker1').datetimepicker({
-            viewMode: 'years',
             format: 'YYYY-MM-DD'
         });
-    })
+
+        //select 2 city
+        jquery('#city').select2({
+            theme: "classic",
+        });
+
+        //select 2 state
+        jquery('#state').select2({
+            theme: "classic",
+        });
+
+        //select 2 meslek
+        jquery('#profession').select2({
+            theme: "classic",
+        });
+
+        //İl ilçe
+        store.findAll('api/getcities').then((cities) => {
+            //Şehirlerin yüklenmesi
+            for (var i in cities.data) {
+                let opt = document.createElement('option');
+                opt.value = cities.data[i].id;
+                opt.innerHTML = cities.data[i].label;
+                document.getElementById('city').appendChild(opt);
+            }
+            //state.global.success('Başarılı bir şekilde kayıt oldunuz. Haydi başlayalım.')
+
+            store.find('api/getprovince', cities.data[0].id).then((province) => {
+                document.getElementById('state').innerHTML = '';
+
+                let opt = document.createElement('option');
+                opt.value = '0';
+                opt.innerHTML = 'İlçe';
+                document.getElementById('state').appendChild(opt);
+
+                //İlçelerin yüklenmesi
+                for (var i in province.data) {
+                    let opt = document.createElement('option');
+                    opt.value = province.data[i].id;
+                    opt.innerHTML = province.data[i].label;
+                    document.getElementById('state').appendChild(opt);
+                }
+            });
+        }).catch((error) => {
+            console.log('ERROR')
+            state.global.error(error.response.data.message)
+
+        });
+
+
+        //Meslek api
+        store.findAll('api/getprofessions').then((professions) => {
+            //Şehirlerin yüklenmesi
+            for (var i in professions.data) {
+                let opt = document.createElement('option');
+                opt.value = professions.data[i].id;
+                opt.innerHTML = professions.data[i].label;
+                document.getElementById('profession').appendChild(opt);
+            }
+        }).catch((error) => {
+            console.log('ERROR')
+            state.global.error(error.response.data.message)
+
+        });
+    });
+
+    emitter.on('index:login:attempt', () => {
+        console.log(state.index.login)
+
+        store.create('login', {
+            'email': state.index.login.email,
+            'password': state.index.login.password,
+
+        }).then((response) => {
+            console.log(response)
+            state.global.success('Başarılı bir şekilde giriş yaptınız.')
+
+            window.setTimeout(function () {
+                document.location.href = '/anasayfa'
+            }, 2000)
+
+        }).catch((error) => {
+            state.global.error(error.response.data.message)
+
+        });
+    });
 
     emitter.on('index:register:attempt', () => {
         console.log(state.index.register)
@@ -40,6 +131,11 @@ module.exports = (state, emitter) => {
 
         if (state.index.register.gender === "") {
             alert('Cinsiyet boş geçilemez')
+            return false;
+        }
+
+        if (state.index.register.birthday === "") {
+            alert('Doğum tarihi boş geçilemez')
             return false;
         }
 
@@ -63,6 +159,7 @@ module.exports = (state, emitter) => {
             alert('Medeni durum boş geçilemez')
             return false;
         }
+
         store.create('register', {
             'email': state.index.register.email,
             'password': state.index.register.password,
@@ -74,14 +171,13 @@ module.exports = (state, emitter) => {
             'marital_status': state.index.register.maritalStatus
 
         }).then((user) => {
-            console.log('success');
             state.global.success('Başarılı bir şekilde kayıt oldunuz. Haydi başlayalım.')
 
         }).catch((error) => {
-            console.log('ERROR')
             state.global.error(error.response.data.message)
 
         });
 
-    })
+    });
+
 }

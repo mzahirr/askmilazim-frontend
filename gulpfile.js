@@ -7,6 +7,7 @@ const babelify = require('babelify').configure({
     presets:['es2020']
 })
 
+const minifyCss = require("gulp-minify-css");
 const node_modules = 'node_modules'
 const sweetAlert = node_modules + '/sweetalert2/dist'
 const bower_components_dir = 'bower_components'
@@ -35,6 +36,12 @@ gulp.task('watch', function () {
     })
 })
 
+gulp.task('minify-css', function () {
+    gulp.src('./app/style.css') // path to your file
+        .pipe(minifyCss())
+        .pipe(gulp.dest('./app/packages'));
+});
+
 gulp.task('copy', function () {
     return gulp.src([
         sweetAlert + '/sweetalert2.min.css',
@@ -42,8 +49,11 @@ gulp.task('copy', function () {
         bower_components_dir + '/moment/locale/tr.js',
         node_modules + '/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js',
         node_modules + '/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css',
+        node_modules + '/select2/dist/css/select2.min.css',
+        node_modules + '/select2/dist/js/select2.min.js'
     ])
         .pipe(gulp.dest('./app/packages'))
 })
 
-gulp.task('default', ['copy', 'watch'])
+
+gulp.task('default', ['copy', 'watch', 'minify-css'])

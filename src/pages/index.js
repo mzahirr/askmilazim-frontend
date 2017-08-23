@@ -1,15 +1,55 @@
 const html = require('choo/html')
+const store = require('../store')
 
 module.exports = (state, emit) => {
 
     function uyeolClick(event) {
         event.preventDefault()
 
+        var datetimepickerSelector = document.getElementById('birthday');
+        state.index.register['birthday'] = datetimepickerSelector.value
+
         emit('index:register:attempt')
     }
 
     function onInput(event) {
         state.index.register[event.target.id] = event.target.value
+    }
+
+    function onStates(event) {
+        state.index.register[event.target.id] = event.target.value
+
+        store.find('api/getprovince', this.value).then((province) => {
+            //İlçelerin yüklenmesi
+
+            document.getElementById('state').innerHTML = '';
+
+            let opt = document.createElement('option');
+            opt.value = '0';
+            opt.innerHTML = 'İlçe';
+            document.getElementById('state').appendChild(opt);
+
+            for (var i in province.data) {
+                let opt = document.createElement('option');
+                opt.value = province.data[i].id;
+                opt.innerHTML = province.data[i].label;
+                document.getElementById('state').appendChild(opt);
+            }
+
+        }).catch((error) => {
+            console.log('ERROR')
+            state.global.error(error.response.data.message)
+
+        });
+    }
+
+    function onInputLogin(e) {
+        state.index.login[event.target.id] = event.target.value
+    }
+
+    function login() {
+        event.preventDefault()
+        emit('index:login:attempt')
     }
 
     return html`
@@ -23,12 +63,12 @@ module.exports = (state, emit) => {
                 <div class="col-sm-7 text-right">
                     <form action="" id="login-form" class="form-inline">
                         <div class="form-group">
-                            <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                            <input type="email" class="form-control" id="email" name="email" oninput=${onInputLogin} placeholder="Email">
                         </div><!-- end form-group -->
                         <div class="form-group">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Şifre">
+                            <input type="password" class="form-control" id="password" name="password" oninput=${onInputLogin} placeholder="Şifre">
                         </div><!-- end form-group -->
-                        <button type="submit" class="btn btn-default">GİRİŞ</button>
+                        <button type="submit" onclick=${login} class="btn btn-default">GİRİŞ</button>
                         <div class="next-line">
                             <a href="#" class="forget-password">Şifrenizi mi unuttunuz?</a>
                             <div class="checkbox">
@@ -91,7 +131,7 @@ module.exports = (state, emit) => {
                             </div><!-- end form-group -->
                             <div class="form-group">
                                 <div class="input-group date" id="datetimepicker1">
-                                    <input type="text" class="form-control" />
+                                    <input type="text" id="birthday" name="birthday" value="${state.index.register.birthday}" oninput=${onInput} class="form-control" />
                                     <span class="input-group-addon">
                                         <span class="glyphicon glyphicon-calendar"></span>
                                     </span>
@@ -99,19 +139,14 @@ module.exports = (state, emit) => {
                             </div>      
                             <div class="form-group divide">
                                 <div class="select-wrapper">
-                                    <select class="form-control" name="city" id="city" onchange=${onInput}>
-                                        <option value="" disabled selected>Şehir</option>
-                                        <option value="34">Istanbul</option>
-                                        <option value="06">Ankara</option>
-                                        <option value="35">Izmir</option>
+                                    <select class="form-control" name="city" id="city" onchange=${onStates}>
+                                        <option value="" disabled selected>İl</option>
                                     </select>
                                 </div><!-- end select-wrapper -->
                                 <div class="select-wrapper">
                                     <select class="form-control" name="state" id="state" onchange=${onInput}>
                                         <option value="" disabled selected>İlçe</option>
-                                        <option value="34">Istanbul</option>
-                                        <option value="06">Ankara</option>
-                                        <option value="35">Izmir</option>
+                                      
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->

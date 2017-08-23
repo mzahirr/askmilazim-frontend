@@ -71,6 +71,26 @@ body.backgrounded{
 - INDEX PAGE
 ==================================
 */
+
+
+.select2-container .select2-selection--single {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    height: 40px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.select2-container--classic .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    padding-top: 3%;
+    padding-right: 40%;
+}
+
 #home{
     background: url(../images/home-bg.jpg) center bottom no-repeat #646b70;
     padding-bottom: 140px;
