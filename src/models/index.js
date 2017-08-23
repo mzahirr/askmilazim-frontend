@@ -19,6 +19,10 @@ module.exports = (state, emitter) => {
             maritalStatus: ''
         },
 
+        register2: {
+            cities: []
+        },
+
         login: {
             email : '',
             password: ''
@@ -47,31 +51,14 @@ module.exports = (state, emitter) => {
 
         //İl ilçe
         store.findAll('api/getcities').then((cities) => {
+
+
+            console.log(cities.data)
+
             //Şehirlerin yüklenmesi
-            for (var i in cities.data) {
-                let opt = document.createElement('option');
-                opt.value = cities.data[i].id;
-                opt.innerHTML = cities.data[i].label;
-                document.getElementById('city').appendChild(opt);
-            }
-            //state.global.success('Başarılı bir şekilde kayıt oldunuz. Haydi başlayalım.')
+            state.index.register2.cities = cities.data
+            emitter.emit('render');
 
-            store.find('api/getprovince', cities.data[0].id).then((province) => {
-                document.getElementById('state').innerHTML = '';
-
-                let opt = document.createElement('option');
-                opt.value = '0';
-                opt.innerHTML = 'İlçe';
-                document.getElementById('state').appendChild(opt);
-
-                //İlçelerin yüklenmesi
-                for (var i in province.data) {
-                    let opt = document.createElement('option');
-                    opt.value = province.data[i].id;
-                    opt.innerHTML = province.data[i].label;
-                    document.getElementById('state').appendChild(opt);
-                }
-            });
         }).catch((error) => {
             console.log('ERROR')
             state.global.error(error.response.data.message)

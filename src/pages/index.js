@@ -1,5 +1,6 @@
 const html = require('choo/html')
 const store = require('../store')
+const each = require('lodash/each')
 
 module.exports = (state, emit) => {
 
@@ -50,6 +51,16 @@ module.exports = (state, emit) => {
     function login() {
         event.preventDefault()
         emit('index:login:attempt')
+    }
+
+    function getCitiesHTML() {
+        let options = []
+        console.log('get')
+        each(state.index.register2.cities, (city) => {
+            options.push('<option value="' + city.id + '">' + city.label + '</option>')
+        })
+
+        return options.join("\n")
     }
 
     return html`
@@ -141,12 +152,12 @@ module.exports = (state, emit) => {
                                 <div class="select-wrapper">
                                     <select class="form-control" name="city" id="city" onchange=${onStates}>
                                         <option value="" disabled selected>İl</option>
+                                        ${getCitiesHTML()}
                                     </select>
                                 </div><!-- end select-wrapper -->
                                 <div class="select-wrapper">
                                     <select class="form-control" name="state" id="state" onchange=${onInput}>
                                         <option value="" disabled selected>İlçe</option>
-                                      
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
