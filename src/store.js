@@ -2,7 +2,7 @@ const DataStore = require('js-data').Container
 const HttpAdapter = require('js-data-http').HttpAdapter
 
 const httpAdapter = new HttpAdapter({
-    basePath: 'http://askmilazimapi.app'
+    basePath: 'http://askmilazim.app'
 });
 
 const store = new DataStore();
@@ -14,5 +14,6 @@ store.defineMapper('login');
 store.defineMapper('api/getcities');
 store.defineMapper('api/getprovince');
 store.defineMapper('api/getprofessions');
+store.defineMapper('api/index');
 
 module.exports = store

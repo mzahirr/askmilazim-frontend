@@ -3,12 +3,16 @@ const datetimepicker = require('eonasdan-bootstrap-datetimepicker')
 const jquery = require('jquery')
 const html = require('choo/html')
 const select2 = require('select2')
+const each = require('lodash/each')
 
 module.exports = (state, emitter) => {
 
     //state veri tabanı name space gibi düşünebiliriz
     state.index = {
-        register: {
+
+        pageInit: false,
+
+        registerData: {
             email: '',
             password: '',
             gender: '',
@@ -19,15 +23,49 @@ module.exports = (state, emitter) => {
             maritalStatus: ''
         },
 
-        register2: {
-            cities: []
+        registerForm: {
+            provinces: [],
+            professions: [],
+
+            getProvinceOptions: () => {
+
+                let options = [];
+
+                each(state.index.registerForm.provinces, (province) => {
+                    options.push(html `<option value="${province.id}">${province.label}</option>`);
+                })
+
+                return options;
+            },
+
+            getProfessionOptions: () => {
+
+                let options = [];
+
+                each(state.index.registerForm.professions, (profession) => {
+                    options.push(html `<option value="${profession.id}">${profession.label}</option>`);
+                })
+
+                return options;
+            }
         },
 
-        login: {
-            email : '',
-            password: ''
+        loginData: {
+            email: 'm.zahirr@hotmail.com',
+            password: '123456'
         }
     }
+
+    emitter.on('index:page-inited', (data) => {
+
+        state.index.pageInit = true;
+
+        state.index.registerForm.provinces = data.provinces
+        state.index.registerForm.professions = data.professions
+
+        emitter.emit('render');
+
+    })
 
     emitter.on(state.events.DOMCONTENTLOADED, () => {
         jquery('#datetimepicker1').datetimepicker({
@@ -49,22 +87,6 @@ module.exports = (state, emitter) => {
             theme: "classic",
         });
 
-        //İl ilçe
-        store.findAll('api/getcities').then((cities) => {
-
-
-            console.log(cities.data)
-
-            //Şehirlerin yüklenmesi
-            state.index.register2.cities = cities.data
-            emitter.emit('render');
-
-        }).catch((error) => {
-            console.log('ERROR')
-            state.global.error(error.response.data.message)
-
-        });
-
 
         //Meslek api
         store.findAll('api/getprofessions').then((professions) => {
@@ -83,81 +105,72 @@ module.exports = (state, emitter) => {
     });
 
     emitter.on('index:login:attempt', () => {
-        console.log(state.index.login)
 
-        store.create('login', {
-            'email': state.index.login.email,
-            'password': state.index.login.password,
+        store.create('login', state.index.loginData).then((response) => {
 
-        }).then((response) => {
             console.log(response)
+
             state.global.success('Başarılı bir şekilde giriş yaptınız.')
 
+            // todo set token in cookie than redirect /anasayfa
+
+            /*
             window.setTimeout(function () {
                 document.location.href = '/anasayfa'
             }, 2000)
+            */
 
         }).catch((error) => {
             state.global.error(error.response.data.message)
 
         });
+
     });
 
     emitter.on('index:register:attempt', () => {
-        console.log(state.index.register)
 
-        if (state.index.register.email === "") {
+        if (state.index.registerData.email === "") {
             alert('E posta boş geçilemez')
             return false;
         }
 
-        if (state.index.register.password === "") {
+        if (state.index.registerData.password === "") {
             alert('Şifre boş geçilemez')
             return false;
         }
 
-        if (state.index.register.gender === "") {
+        if (state.index.registerData.gender === "") {
             alert('Cinsiyet boş geçilemez')
             return false;
         }
 
-        if (state.index.register.birthday === "") {
+        if (state.index.registerData.birthday === "") {
             alert('Doğum tarihi boş geçilemez')
             return false;
         }
 
-        if (state.index.register.city === "") {
+        if (state.index.registerData.city === "") {
             alert('Şehir boş geçilemez')
             return false;
         }
 
 
-        if (state.index.register.state === "") {
+        if (state.index.registerData.state === "") {
             alert('İlçe boş geçilemez')
             return false;
         }
 
-        if (state.index.register.profession === "") {
+        if (state.index.registerData.profession === "") {
             alert('Meslek boş geçilemez')
             return false;
         }
 
-        if (state.index.register.maritalStatus === "") {
+        if (state.index.registerData.maritalStatus === "") {
             alert('Medeni durum boş geçilemez')
             return false;
         }
 
-        store.create('register', {
-            'email': state.index.register.email,
-            'password': state.index.register.password,
-            'gender': state.index.register.gender,
-            'birth_day': state.index.register.birthday,
-            'city_id': state.index.register.city,
-            'province_id': state.index.register.state,
-            'profession_id': state.index.register.profession,
-            'marital_status': state.index.register.maritalStatus
-
-        }).then((user) => {
+        store.create('register', state.index.registerData).then((user) => {
             state.global.success('Başarılı bir şekilde kayıt oldunuz. Haydi başlayalım.')
 
         }).catch((error) => {

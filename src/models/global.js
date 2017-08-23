@@ -3,6 +3,9 @@ const alert = require('sweetalert2')
 module.exports = (state, emitter) => {
 
     state.global = {
+
+
+
         info : (message) => {
             alert({
                 title: 'Bilgi',

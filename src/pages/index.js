@@ -1,24 +1,34 @@
 const html = require('choo/html')
 const store = require('../store')
 const each = require('lodash/each')
+const map = require('lodash/map')
 
 module.exports = (state, emit) => {
 
-    function uyeolClick(event) {
-        event.preventDefault()
+    if ( ! state.index.pageInit) {
 
-        var datetimepickerSelector = document.getElementById('birthday');
-        state.index.register['birthday'] = datetimepickerSelector.value
+        //İl ilçe
+        store.findAll('api/index').then((data) => {
 
-        emit('index:register:attempt')
+            emit('index:page-inited', data)
+
+        }).catch((error) => {
+            console.log('ERROR')
+            state.global.error(error.response.data.message)
+        });
+
     }
 
-    function onInput(event) {
-        state.index.register[event.target.id] = event.target.value
+    function onInputRegister(event) {
+        state.index.registerData[event.target.id] = event.target.value
+    }
+
+    function onInputLogin(e) {
+        state.index.loginData[event.target.id] = event.target.value
     }
 
     function onStates(event) {
-        state.index.register[event.target.id] = event.target.value
+        state.index.registerData[event.target.id] = event.target.value
 
         store.find('api/getprovince', this.value).then((province) => {
             //İlçelerin yüklenmesi
@@ -44,23 +54,19 @@ module.exports = (state, emit) => {
         });
     }
 
-    function onInputLogin(e) {
-        state.index.login[event.target.id] = event.target.value
-    }
-
-    function login() {
+    function handleLogin() {
         event.preventDefault()
         emit('index:login:attempt')
     }
 
-    function getCitiesHTML() {
-        let options = []
-        console.log('get')
-        each(state.index.register2.cities, (city) => {
-            options.push('<option value="' + city.id + '">' + city.label + '</option>')
-        })
+    function handleRegister(event) {
 
-        return options.join("\n")
+        event.preventDefault()
+
+        var datetimepickerSelector = document.getElementById('birthday');
+        state.index.registerData['birthday'] = datetimepickerSelector.value
+
+        emit('index:register:attempt')
     }
 
     return html`
@@ -74,12 +80,12 @@ module.exports = (state, emit) => {
                 <div class="col-sm-7 text-right">
                     <form action="" id="login-form" class="form-inline">
                         <div class="form-group">
-                            <input type="email" class="form-control" id="email" name="email" oninput=${onInputLogin} placeholder="Email">
+                            <input type="email" class="form-control" id="email" name="email" value="${state.index.loginData.email}" oninput=${onInputLogin} placeholder="Email">
                         </div><!-- end form-group -->
                         <div class="form-group">
-                            <input type="password" class="form-control" id="password" name="password" oninput=${onInputLogin} placeholder="Şifre">
+                            <input type="password" class="form-control" id="password" name="password" value="${state.index.loginData.password}" oninput=${onInputLogin} placeholder="Şifre">
                         </div><!-- end form-group -->
-                        <button type="submit" onclick=${login} class="btn btn-default">GİRİŞ</button>
+                        <button type="submit" onclick=${handleLogin} class="btn btn-default">GİRİŞ</button>
                         <div class="next-line">
                             <a href="#" class="forget-password">Şifrenizi mi unuttunuz?</a>
                             <div class="checkbox">
@@ -126,14 +132,14 @@ module.exports = (state, emit) => {
                         <span class="middle-desc">veya e-posta ile kayıt ol</span>
                         <form id="register-form">
                             <div class="form-group">
-                                <input type="email" id="email" name="email" value="${state.index.register.email}" oninput=${onInput} class="form-control" placeholder="E-Posta Adresiniz">
+                                <input type="email" id="email" name="email" value="${state.index.registerData.email}" oninput=${onInputRegister} class="form-control" placeholder="E-Posta Adresiniz">
                             </div><!-- end form-group -->
                             <div class="form-group">
-                                <input type="password" id="password" value="${state.index.register.password}" oninput=${onInput} name="password" class="form-control" placeholder="Parolanız">
+                                <input type="password" id="password" value="${state.index.registerData.password}" oninput=${onInputRegister} name="password" class="form-control" placeholder="Parolanız">
                             </div><!-- end form-group -->
                             <div class="form-group">
                                 <div class="select-wrapper">
-                                    <select class="form-control" name="gender" id="gender" onchange=${onInput}>
+                                    <select class="form-control" name="gender" id="gender" onchange=${onInputRegister}>
                                         <option value="" disabled selected>Cinsiyetiniz</option>
                                         <option value="1">Erkek</option>
                                         <option value="0">Bayan</option>
@@ -142,7 +148,7 @@ module.exports = (state, emit) => {
                             </div><!-- end form-group -->
                             <div class="form-group">
                                 <div class="input-group date" id="datetimepicker1">
-                                    <input type="text" id="birthday" name="birthday" value="${state.index.register.birthday}" oninput=${onInput} class="form-control" />
+                                    <input type="text" id="birthday" name="birthday" value="${state.index.registerData.birthday}" oninput=${onInputRegister} class="form-control" />
                                     <span class="input-group-addon">
                                         <span class="glyphicon glyphicon-calendar"></span>
                                     </span>
@@ -152,28 +158,26 @@ module.exports = (state, emit) => {
                                 <div class="select-wrapper">
                                     <select class="form-control" name="city" id="city" onchange=${onStates}>
                                         <option value="" disabled selected>İl</option>
-                                        ${getCitiesHTML()}
+                                        ${state.index.registerForm.getProvinceOptions()}
                                     </select>
                                 </div><!-- end select-wrapper -->
                                 <div class="select-wrapper">
-                                    <select class="form-control" name="state" id="state" onchange=${onInput}>
+                                    <select class="form-control" name="state" id="state" onchange=${onInputRegister}>
                                         <option value="" disabled selected>İlçe</option>
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
                             <div class="form-group">
                                 <div class="select-wrapper">
-                                    <select class="form-control" name="profession" id="profession" onchange=${onInput}>
+                                    <select class="form-control" name="profession" id="profession" onchange=${onInputRegister}>
                                         <option value="" disabled selected>Mesleğiniz</option>
-                                        <option value="34">Yazilimci</option>
-                                        <option value="06">Tasarimci</option>
-                                        <option value="35">Muhendis</option>
+                                        ${state.index.registerForm.getProfessionOptions()}
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
                             <div class="form-group">
                                 <div class="select-wrapper">
-                                    <select class="form-control" name="maritalStatus" id="maritalStatus" onchange=${onInput}>
+                                    <select class="form-control" name="maritalStatus" id="maritalStatus" onchange=${onInputRegister}>
                                         <option value="" disabled selected>Medeni Haliniz</option>
                                         <option value="0">Bekar</option>
                                         <option value="1">Evli</option>
@@ -181,7 +185,7 @@ module.exports = (state, emit) => {
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
                             <p>Ücretsiz Üye Ol’a tıklayarak, <a href="#">Şartları</a> ve askmilazim.com’dan e-posta almayı kabul ediyorsun. Ayrıca, profiline girdiğin bilgileri başkalarının görebileceğini de kabul ediyorsun.</p>
-                            <button type="submit" onclick=${uyeolClick} class="btn btn-success">ÜCRETSİZ ÜYE OL</button>
+                            <button type="submit" onclick=${handleRegister} class="btn btn-success">ÜCRETSİZ ÜYE OL</button>
                         </form>
                     </div><!-- end register-form -->
                 </div><!-- end column -->
