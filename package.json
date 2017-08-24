@@ -12,6 +12,7 @@
   "dependencies": {
     "babel-preset-es2020": "^1.0.2",
     "babelify": "^7.3.0",
+    "browser-cookies": "^1.1.0",
     "budo": "^10.0.4",
     "choo": "^6.0.0",
     "choo-log": "^7.2.1",

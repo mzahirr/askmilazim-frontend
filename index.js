@@ -2,8 +2,11 @@ var html = require('choo/html')
 var choo = require('choo')
 
 var app = choo()
+
 app.use(countStore)
+
 app.route('/', mainView)
+
 app.html('body')
 
 function mainView (state, emit) {

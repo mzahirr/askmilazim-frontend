@@ -4,6 +4,7 @@ const jquery = require('jquery')
 const html = require('choo/html')
 const select2 = require('select2')
 const each = require('lodash/each')
+const cookies = require('browser-cookies')
 
 module.exports = (state, emitter) => {
 
@@ -15,47 +16,58 @@ module.exports = (state, emitter) => {
         registerData: {
             email: '',
             password: '',
-            gender: '',
+            gender_id: 0,
             birthday: '',
-            city: '',
-            state: '',
-            profession: '',
-            maritalStatus: ''
+            province_id: 0,
+            state_id: 0,
+            profession_id: '',
+            marital_status_id: 0
         },
 
         registerForm: {
+            genders: [],
             provinces: [],
             states: [],
             professions: [],
+            maritalStatuses: [],
 
-            getProvinceOptions: () => {
-
+            getGenderOptions: () => {
                 let options = [];
-
-                each(state.index.registerForm.provinces, (province) => {
-                    options.push(html `<option value="${province.id}">${province.label}</option>`);
+                each(state.index.registerForm.genders, (gender) => {
+                    options.push(html `<option value="${gender.id}" ${gender.id == state.index.registerData.gender_id ? selected = "selected" : ''}>${gender.label}</option>`);
                 })
-
                 return options;
             },
 
-            getStates: () => {
+            getProvinceOptions: () => {
                 let options = [];
-                each(state.index.registerForm.states, (state) => {
-                    options.push(html `<option value="${state.id}">${state.label}</option>`);
+                each(state.index.registerForm.provinces, (province) => {
+                    options.push(html `<option value="${province.id}" ${province.id == state.index.registerData.province_id ? selected = "selected" : ''}>${province.label}</option>`);
                 })
+                return options;
+            },
 
+            getStateOptions: () => {
+                let options = [];
+                each(state.index.registerForm.states, (stateItem) => {
+                    options.push(html `<option value="${stateItem.id}" ${stateItem.id == state.index.registerData.state_id ? selected = "selected" : ''}>${stateItem.label}</option>`);
+                })
                 return options;
             },
 
             getProfessionOptions: () => {
-
                 let options = [];
-
                 each(state.index.registerForm.professions, (profession) => {
-                    options.push(html `<option value="${profession.id}">${profession.label}</option>`);
+                    options.push(html `<option value="${profession.id}" ${profession.id == state.index.registerData.profession_id ? selected = "selected" : ''}>${profession.label}</option>`);
                 })
+                return options;
+            },
 
+            getMaritalStatusOptions: () => {
+                let options = [];
+                each(state.index.registerForm.maritalStatuses, (maritalStatus) => {
+                    options.push(html `<option value="${maritalStatus.id}" ${maritalStatus.id == state.index.registerData.marital_status_id ? selected = "selected" : ''}>${maritalStatus.label}</option>`);
+                })
                 return options;
             }
         },
@@ -68,20 +80,20 @@ module.exports = (state, emitter) => {
 
     emitter.on('index:page-inited', (data) => {
 
-        state.index.pageInit = true;
-
-        state.index.registerForm.provinces = data.provinces
+        state.index.registerForm.genders = data.genders
+        state.index.registerForm.maritalStatuses = data.maritalStatuses
         state.index.registerForm.professions = data.professions
+        state.index.registerForm.provinces = data.provinces
+
+        state.index.pageInit = true;
 
         emitter.emit('render');
 
     });
 
-    emitter.on('index:states', (data) => {
+    emitter.on('index:states', (states) => {
 
-        state.index.stateInit = true;
-
-        state.index.registerForm.states = data;
+        state.index.registerForm.states = states;
 
         emitter.emit('render');
 
@@ -89,24 +101,27 @@ module.exports = (state, emitter) => {
 
 
     emitter.on(state.events.DOMCONTENTLOADED, () => {
+
         jquery('#datetimepicker1').datetimepicker({
             format: 'YYYY-MM-DD'
         });
 
         //select 2 city
-        jquery('#city').select2({
+        /*
+        jquery('#province_id').select2({
             theme: "classic",
         });
 
         //select 2 state
-        jquery('#state').select2({
+        jquery('#state_id').select2({
             theme: "classic",
         });
 
         //select 2 meslek
-        jquery('#profession').select2({
+        jquery('#profession_id').select2({
             theme: "classic",
         });
+        */
 
     });
 
@@ -116,17 +131,14 @@ module.exports = (state, emitter) => {
 
             state.global.success('Başarılı bir şekilde giriş yaptınız.')
 
-            // todo set token in cookie than redirect /anasayfa
+            cookies.set('token', response.token, {
+                expires: 7 // expire in 7 days
+            });
 
-            /*
-            window.setTimeout(function () {
-                document.location.href = '/anasayfa'
-            }, 2000)
-            */
+            emitter.emit('replaceState', '/anasayfa');
 
         }).catch((error) => {
             state.global.error(error.response.data.message)
-
         });
 
     });

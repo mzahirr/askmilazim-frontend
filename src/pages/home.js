@@ -3,6 +3,9 @@ const store = require('../store')
 
 module.exports = (state, emit) => {
     return html`
-   <h1>Deneme</h1>
+<div>
+    <h1>Deneme</h1>
+    <a href="/logout">Çıkış</a>
+</div>
   `
 }

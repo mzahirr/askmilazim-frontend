@@ -1,60 +1,29 @@
 const html = require('choo/html')
 const store = require('../store')
+const registerForm = require('../elements/register-form')
 
 module.exports = (state, emit) => {
 
     if ( ! state.index.pageInit) {
 
-        //İl ilçe
-        store.findAll('api/index').then((data) => {
+        store.findAll('index').then((data) => {
 
             emit('index:page-inited', data)
-
 
         }).catch((error) => {
             console.log('ERROR')
             state.global.error(error.response.data.message)
         });
 
-    }
-
-    function onInputRegister(event) {
-        state.index.registerData[event.target.id] = event.target.value
     }
 
     function onInputLogin(e) {
         state.index.loginData[event.target.id] = event.target.value
     }
 
-    function onStates(event) {
-        state.index.registerData[event.target.id] = event.target.value
-
-        store.find('api/getstates', this.value).then((states) => {
-            //İlçelerin yüklenmesi
-
-            emit('index:states', states.data)
-
-
-        }).catch((error) => {
-            console.log('ERROR')
-            state.global.error(error.response.data.message)
-
-        });
-    }
-
     function handleLogin() {
         event.preventDefault()
         emit('index:login:attempt')
-    }
-
-    function handleRegister(event) {
-
-        event.preventDefault()
-
-        var datetimepickerSelector = document.getElementById('birthday');
-        state.index.registerData['birthday'] = datetimepickerSelector.value
-
-        emit('index:register:attempt')
     }
 
     return html`
@@ -112,71 +81,7 @@ module.exports = (state, emit) => {
                     </div><!-- end home-text -->
                 </div><!-- end column -->
                 <div class="col-sm-7 text-right register-area">
-                    <div class="register-form-box">
-                        <a href="#" id="facebook-register-link">
-                            <i class="fa fa-facebook"></i>
-                            Facebook ile Kayıt Ol
-                        </a>
-                        <span class="middle-desc">veya e-posta ile kayıt ol</span>
-                        <form id="register-form">
-                            <div class="form-group">
-                                <input type="email" id="email" name="email" value="${state.index.registerData.email}" oninput=${onInputRegister} class="form-control" placeholder="E-Posta Adresiniz">
-                            </div><!-- end form-group -->
-                            <div class="form-group">
-                                <input type="password" id="password" value="${state.index.registerData.password}" oninput=${onInputRegister} name="password" class="form-control" placeholder="Parolanız">
-                            </div><!-- end form-group -->
-                            <div class="form-group">
-                                <div class="select-wrapper">
-                                    <select class="form-control" name="gender" id="gender" onchange=${onInputRegister}>
-                                        <option value="" disabled selected>Cinsiyetiniz</option>
-                                        <option value="1">Erkek</option>
-                                        <option value="0">Bayan</option>
-                                    </select>
-                                </div><!-- end select-wrapper -->
-                            </div><!-- end form-group -->
-                            <div class="form-group">
-                                <div class="input-group date" id="datetimepicker1">
-                                    <input type="text" id="birthday" name="birthday" value="${state.index.registerData.birthday}" oninput=${onInputRegister} class="form-control" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                </div>
-                            </div>      
-                            <div class="form-group divide">
-                                <div class="select-wrapper">
-                                    <select class="form-control" name="city" id="city" onchange=${onStates}>
-                                        <option value="" disabled selected>İl</option>
-                                        ${state.index.registerForm.getProvinceOptions()}
-                                    </select>
-                                </div><!-- end select-wrapper -->
-                                <div class="select-wrapper">
-                                    <select class="form-control" name="state" id="state" onchange=${onInputRegister}>
-                                        <option value="" disabled selected>İlçe</option>
-                                        ${state.index.registerForm.getStates()}
-                                    </select>
-                                </div><!-- end select-wrapper -->
-                            </div><!-- end form-group -->
-                            <div class="form-group">
-                                <div class="select-wrapper">
-                                    <select class="form-control" name="profession" id="profession" onchange=${onInputRegister}>
-                                        <option value="" disabled selected>Mesleğiniz</option>
-                                        ${state.index.registerForm.getProfessionOptions()}
-                                    </select>
-                                </div><!-- end select-wrapper -->
-                            </div><!-- end form-group -->
-                            <div class="form-group">
-                                <div class="select-wrapper">
-                                    <select class="form-control" name="maritalStatus" id="maritalStatus" onchange=${onInputRegister}>
-                                        <option value="" disabled selected>Medeni Haliniz</option>
-                                        <option value="0">Bekar</option>
-                                        <option value="1">Evli</option>
-                                    </select>
-                                </div><!-- end select-wrapper -->
-                            </div><!-- end form-group -->
-                            <p>Ücretsiz Üye Ol’a tıklayarak, <a href="#">Şartları</a> ve askmilazim.com’dan e-posta almayı kabul ediyorsun. Ayrıca, profiline girdiğin bilgileri başkalarının görebileceğini de kabul ediyorsun.</p>
-                            <button type="submit" onclick=${handleRegister} class="btn btn-success">ÜCRETSİZ ÜYE OL</button>
-                        </form>
-                    </div><!-- end register-form -->
+                    ${registerForm(state, emit)}
                 </div><!-- end column -->
             </div><!-- end row -->
         </div></section>
