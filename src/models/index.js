@@ -25,6 +25,7 @@ module.exports = (state, emitter) => {
 
         registerForm: {
             provinces: [],
+            states: [],
             professions: [],
 
             getProvinceOptions: () => {
@@ -33,6 +34,15 @@ module.exports = (state, emitter) => {
 
                 each(state.index.registerForm.provinces, (province) => {
                     options.push(html `<option value="${province.id}">${province.label}</option>`);
+                })
+
+                return options;
+            },
+
+            getStates: () => {
+                let options = [];
+                each(state.index.registerForm.states, (state) => {
+                    options.push(html `<option value="${state.id}">${state.label}</option>`);
                 })
 
                 return options;
@@ -65,7 +75,18 @@ module.exports = (state, emitter) => {
 
         emitter.emit('render');
 
-    })
+    });
+
+    emitter.on('index:states', (data) => {
+
+        state.index.stateInit = true;
+
+        state.index.registerForm.states = data;
+
+        emitter.emit('render');
+
+    });
+
 
     emitter.on(state.events.DOMCONTENTLOADED, () => {
         jquery('#datetimepicker1').datetimepicker({
@@ -87,28 +108,11 @@ module.exports = (state, emitter) => {
             theme: "classic",
         });
 
-
-        //Meslek api
-        store.findAll('api/getprofessions').then((professions) => {
-            //Şehirlerin yüklenmesi
-            for (var i in professions.data) {
-                let opt = document.createElement('option');
-                opt.value = professions.data[i].id;
-                opt.innerHTML = professions.data[i].label;
-                document.getElementById('profession').appendChild(opt);
-            }
-        }).catch((error) => {
-            console.log('ERROR')
-            state.global.error(error.response.data.message)
-
-        });
     });
 
     emitter.on('index:login:attempt', () => {
 
         store.create('login', state.index.loginData).then((response) => {
-
-            console.log(response)
 
             state.global.success('Başarılı bir şekilde giriş yaptınız.')
 

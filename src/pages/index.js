@@ -1,7 +1,5 @@
 const html = require('choo/html')
 const store = require('../store')
-const each = require('lodash/each')
-const map = require('lodash/map')
 
 module.exports = (state, emit) => {
 
@@ -11,6 +9,7 @@ module.exports = (state, emit) => {
         store.findAll('api/index').then((data) => {
 
             emit('index:page-inited', data)
+
 
         }).catch((error) => {
             console.log('ERROR')
@@ -30,22 +29,11 @@ module.exports = (state, emit) => {
     function onStates(event) {
         state.index.registerData[event.target.id] = event.target.value
 
-        store.find('api/getprovince', this.value).then((province) => {
+        store.find('api/getstates', this.value).then((states) => {
             //İlçelerin yüklenmesi
 
-            document.getElementById('state').innerHTML = '';
+            emit('index:states', states.data)
 
-            let opt = document.createElement('option');
-            opt.value = '0';
-            opt.innerHTML = 'İlçe';
-            document.getElementById('state').appendChild(opt);
-
-            for (var i in province.data) {
-                let opt = document.createElement('option');
-                opt.value = province.data[i].id;
-                opt.innerHTML = province.data[i].label;
-                document.getElementById('state').appendChild(opt);
-            }
 
         }).catch((error) => {
             console.log('ERROR')
@@ -164,6 +152,7 @@ module.exports = (state, emit) => {
                                 <div class="select-wrapper">
                                     <select class="form-control" name="state" id="state" onchange=${onInputRegister}>
                                         <option value="" disabled selected>İlçe</option>
+                                        ${state.index.registerForm.getStates()}
                                     </select>
                                 </div><!-- end select-wrapper -->
                             </div><!-- end form-group -->
