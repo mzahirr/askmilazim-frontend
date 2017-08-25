@@ -1,11 +1,17 @@
 const html = require('choo/html')
 const cookies = require('browser-cookies')
+const Component = require('nanocomponent')
 
 module.exports = (state, emit) => {
 
-    console.log(JSON.parse(cookies.get('member')))
-    return html `
-        <div class="widget profile">
+    class Profile extends Component {
+        constructor() {
+            super()
+        }
+
+        createElement() {
+            return html `
+                <div class="widget profile">
                         <div class="image"><img src="images/my-image.jpg" alt="Username"></div>
                         <span class="name">8N8FJYP7</span>
                         <span class="premium-until"><i class="fa fa-star"></i> Premium Kalan 28 / 30 Gün</span>
@@ -19,5 +25,12 @@ module.exports = (state, emit) => {
                             </div>
                         </div><!-- end profile-status -->
                     </div>
-    `
+            `
+        }
+    }
+
+    const profile = new Profile()
+
+
+    return html `${profile.render()}`
 }
