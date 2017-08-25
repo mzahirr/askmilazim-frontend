@@ -135,6 +135,12 @@ module.exports = (state, emitter) => {
                 expires: 7 // expire in 7 days
             });
 
+            console.log(response.member)
+
+            cookies.set('member', JSON.stringify(response.member), {
+                expires:7
+            });
+
             emitter.emit('replaceState', '/anasayfa');
 
         }).catch((error) => {
